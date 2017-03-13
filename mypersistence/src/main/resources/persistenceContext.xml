@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="com.scb.soonhui.persistence" />
+    <context:property-placeholder location="classpath:persistenceConfig.properties"/>
+
+    <!-- Database related -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.initialSize}"/>
+        <property name="minIdle" value="${jdbc.minIdle}"/>
+        <property name="maxActive" value="${jdbc.maxActive}"/>
+        <property name="maxWait" value="${jdbc.maxWait}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.tberm}"/>
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.meitm}"/>
+        <property name="validationQuery" value="${jdbc.vq}"/>
+        <property name="testWhileIdle" value="${jdbc.twi}"/>
+        <property name="testOnBorrow" value="${jdbc.tob}"/>
+        <property name="testOnReturn" value="${jdbc.tor}"/>
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan">
+            <list>
+                <!-- 可以加多个包 -->
+                <value>com.scb.soonhui.persistence.entity</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show.sql}</prop>
+                <prop key="hibernate.format_sql">${hibernate.format.sql}</prop>
+                <prop key="hibernate.cache.use_second_level_cache">${hibernate.use.second.level.cache}</prop>
+                <prop key="hibernate.cache.use_query_cache">${hibernate.use.query.cache}</prop>
+                <prop key="hibernate.cache.region.factory_class">${hibernate.factory.class}</prop>
+                <prop key="hibernate.cache.provider_configuration_file_resource_path">${hibernate.provider.resource}</prop>
+                <prop key="hibernate.cache.use_structured_entries">${hibernate.use.structured.entries}</prop>
+                <prop key="hibernate.generate_statistics">${hibernate.generate.statistics}</prop>
+                <!-- 性能优化 -->
+                <prop key="hibernate.default_batch_fetch_size">${hibernate.default.size}</prop>
+                <prop key="hibernate.max_fetch_depth">${hibernate.max.fetch.depth}</prop>
+                <prop key="hibernate.jdbc.fetch_size">${hibernate.jdbc.fetch.size}</prop>
+                <prop key="hibernate.jdbc.batch_size">${hibernate.jdbc.batch.size}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+        <property name="sessionFactory" ref="sessionFactory"/>
+        <property name="cacheQueries" value="true"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 开启事务管理注解 -->
+    <tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManager"/>
+
+    <!--<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" abstract="true">-->
+    <!--<property name="transactionManager" ref="transactionManager"/>-->
+    <!--<property name="proxyTargetClass" value="true"/>-->
+    <!--<property name="transactionAttributes">-->
+    <!--<props>-->
+    <!--<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>-->
+    <!--<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>-->
+    <!--<prop key="load*">PROPAGATION_REQUIRED,readOnly</prop>-->
+    <!--<prop key="insert*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="add*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="action*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="save*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="update*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="remove*">PROPAGATION_REQUIRED</prop>-->
+    <!--<prop key="delete*">PROPAGATION_REQUIRED</prop>-->
+    <!--</props>-->
+    <!--</property>-->
+    <!--</bean>-->
+    <!--<bean id="UserDaoImpl" parent="baseTransactionProxy">-->
+    <!--<property name="target">-->
+    <!--<bean class="com.scb.soonhui.com.scb.soonhui.persistence.dao.impl.UserDaoImpl"/>-->
+    <!--</property>-->
+    <!--</bean>-->
+    <!--<bean id="BlogDaoImpl" parent="baseTransactionProxy">-->
+    <!--<property name="target">-->
+    <!--<bean class="com.scb.soonhui.com.scb.soonhui.persistence.dao.impl.BlogDaoImpl"/>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+</beans>
